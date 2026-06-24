@@ -17,8 +17,7 @@ OP_<LANGUAGE>_<KESTREL_FILE_NO>_<CATEGORY>_<Mixed/Only>.txt
 
 ### Step 2: Translation to Target Indic Language
 
-The extracted sentences are translated into the target Indic language using the NLLB-1B model. Since machine translation models typically leave numeric and other non-standard tokens unchanged, the resulting sentences generally preserve the original unnormalized entities while translating the surrounding text.
-
+The extracted tagged sentences are directly translated into the target Indic language using the NLLB-1B model without removing the category tags. It was observed that the translation model generally preserves both the unnormalized entities (such as numbers, dates, and other non-standard tokens) and their associated tags while translating the surrounding text into the target language. As a result, this step simultaneously produces translated sentences and retains the tagging information that identifies the category of each unnormalized entity, eliminating the need for a separate tagging process in the target language.
 The translated files are stored as:
 
 ```text
