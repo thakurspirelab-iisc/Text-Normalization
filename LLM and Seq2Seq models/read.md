@@ -1,109 +1,137 @@
-# Text Normalization for Indic Languages
+# LLM and Seq2Seq Models
 
-This repository presents an ensemble-based approach for text normalization in Indic languages. Text normalization remains a relatively underexplored problem for many Indic languages, largely due to the scarcity of high-quality annotated training data. To address this challenge, we propose a synthetic data generation pipeline that leverages Large Language Models (LLMs) and the Kestrel dataset to create text normalization datasets for target Indic languages.
+This folder contains the training and inference code for the sequence-to-sequence and Large Language Models (LLMs) used for text normalization in Indic languages.
 
-## Ensemble Architecture
+## Supported Models
 
-The proposed ensemble system combines the strengths of multiple normalization approaches:
+### Large Language Models (LLMs)
 
-- **Rule-Based Model (RB)**
-- **mT5 Small**
-- **Hints_IB (IndicBERT with Hints)**
+* **Gemma 270M**
+* **Gemma 1B**
+* **Llama 1B**
 
-### Hints_IB (IndicBERT with Hints)
+### Sequence-to-Sequence Models
 
-Hints_IB consists of two stages:
-
-1. An **IndicBERT-based NER model** identifies and tags unnormalized spans in the input sentence.
-2. The detected spans are passed to a modified **IndicBERT decoder**, along with rule-based hints, to generate their normalized spoken-form representations.
-
-The normalized spans are then substituted back into the original sentence to produce the final normalized output.
+* **mT5 Small**
+* **mT5 Large (~1B parameters)**
+* **IndicBART**
 
 ---
 
-## Repository Structure
+## Training
 
-### Data Generation
+The models are trained using the synthetic text normalization datasets generated using the pipeline provided in the `data_generation` folder.
 
-The `data_generation` folder contains the complete pipeline for generating synthetic text normalization datasets from the Kestrel dataset. Detailed instructions are provided within the folder for generating datasets in new Indic languages from scratch.
+### Training Data Format
 
-### Model Weights and Training Data
+Each line of the training file is a dictionary (or JSON object) containing a tagged unnormalized sentence and its corresponding tagged normalized output.
 
-The script `import_models_&_training_data.py` can be used to download:
-
-- Pretrained Hints_IB model weights
-- Training datasets
-- Dynamic model router weights
-
-for both Hindi and Kannada.
-
-### LLM and Seq2Seq Models
-
-The `LLM_and_seq2seq` folder contains training and inference code for:
-
-- Gemma
-- Llama
-- mT5
-- IndicBART
-
-Additional details and usage instructions are available within the folder.
-
-### Indic_BERT_with_Hints
-
-The `Indic_BERT_with_Hints` folder contains the training and inference code for the encoder and decoder components of the Hints_IB model.
-
-### Rule_Based_Models
-
-The `Rule_Based_Models` folder contains rule-based text normalization systems for:
-
-- Hindi
-- Kannada
-
-### Ensemble_Models
-
-The `Ensemble_Models` folder contains the training and inference code for the final ensemble system, which combines:
-
-- Rule-Based normalization
-- mT5 Small
-- Hints_IB
-
-through a dynamic model selection framework.
-
-**Important:** To obtain an mT5 model compatible with the ensemble framework, first download the training data using `import_models_&_training_data.py`. The downloaded dataset can then be used to train mT5 Small using the training scripts provided in the `LLM_and_seq2seq` folder.
-
----
-
-## Model Training
-
-The following models were trained on the generated text normalization dataset using supervised fine-tuning (SFT):
-
-- **Gemma 1B**, **Llama 1B**, and **mT5 Large (~1B parameters)** were fine-tuned using **LoRA (Low-Rank Adaptation)**.
-- **Gemma 270M** was trained using a combination of **LoRA-based fine-tuning** and **knowledge distillation**, with **Gemma 1B** serving as the teacher model.
-- **IndicBART** and **mT5 Small** were fully fine-tuned by updating all model parameters.
-
-This setup enables comparison between:
-
-- Full fine-tuning
-- Parameter-efficient fine-tuning (LoRA)
-- Knowledge-distillation-based training
-
-for the task of text normalization in Indic languages.
-
----
-
-## Dataset Format
-
-The training data is stored as a `.txt` file, where each line contains a Python dictionary (or JSON object) representing a single training example.
-
-Each example typically contains:
-
-- `tagged_ip` (or `unnorm` / `unnormalized`) — the tagged unnormalized input sentence.
-- `normalized_op` — the corresponding tagged normalized output sentence.
-
-### Example
+Example:
 
 ```python
 {
-    "tagged_ip": "मेरी उम्र <25><CARDINAL> साल है",
-    "normalized_op": "मेरी उम्र <पच्चीस><CARDINAL> साल है"
+    "tagged_ip": "मेरी उम्र <CARDINAL>25</CARDINAL> साल है",
+    "normalized_op": "मेरी उम्र <CARDINAL>पच्चीस</CARDINAL> साल है"
 }
+```
+
+During training, the dataset loader removes the tags and uses:
+
+**Input**
+
+```text
+मेरी उम्र 25 साल है
+```
+
+**Target**
+
+```text
+मेरी उम्र पच्चीस साल है
+```
+
+for model training.
+
+---
+
+## Fine-Tuning Strategy
+
+### LoRA Fine-Tuning
+
+The following models are fine-tuned using **LoRA (Low-Rank Adaptation)**:
+
+* Gemma 1B
+* Llama 1B
+* mT5 Large (~1B parameters)
+
+LoRA significantly reduces the number of trainable parameters while maintaining strong performance.
+
+### Knowledge Distillation
+
+**Gemma 270M** is trained using:
+
+* LoRA-based fine-tuning
+* Knowledge Distillation
+
+with **Gemma 1B** serving as the teacher model.
+
+### Full Fine-Tuning
+
+The following models are fully fine-tuned by updating all model parameters:
+
+* mT5 Small
+* IndicBART
+
+---
+
+## Training Scripts
+
+This folder contains separate training scripts for each model. Model-specific hyperparameters, checkpoints, and dataset paths can be configured directly within the corresponding training scripts.
+
+---
+
+## Inference
+
+Inference scripts are provided for all supported models. Given an unnormalized sentence, the models generate the corresponding normalized spoken-form sentence.
+
+Example:
+
+**Input**
+
+```text
+मेरी उम्र 25 साल है
+```
+
+**Output**
+
+```text
+मेरी उम्र पच्चीस साल है
+```
+
+---
+
+## Ensemble Compatibility
+
+The ensemble framework included in the `Ensemble_Models` folder uses:
+
+* Rule-Based Normalization
+* Hints_IB
+* mT5 Small
+
+For compatibility with the ensemble system, the provided training data downloaded through `import_models_&_training_data.py` should be used to train the mT5 Small model.
+
+The resulting mT5 Small checkpoint can then be directly integrated into the ensemble pipeline.
+
+---
+
+## Folder Contents
+
+This folder includes:
+
+* Training scripts for Gemma, Llama, mT5, and IndicBART
+* Inference scripts for all models
+* LoRA fine-tuning implementations
+* Knowledge distillation code for Gemma 270M
+* Utility scripts for data loading and preprocessing
+* Model evaluation scripts
+
+Refer to the individual model files for model-specific training and inference instructions.
