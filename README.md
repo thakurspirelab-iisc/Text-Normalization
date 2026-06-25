@@ -1,6 +1,6 @@
 # Text Normalization for Indic Languages
 
-This repository presents an ensemble-based approach for text normalization in Indic languages. Text normalization remains a relatively underexplored problem for many Indic languages, with one of the primary challenges being the lack of high-quality training data. To address this, we propose a synthetic data generation pipeline that leverages Large Language Models (LLMs) and the Kestrel dataset to create text normalization datasets for target Indic languages.
+This repository presents an ensemble-based approach for text normalization in Indic languages. Text normalization remains a relatively underexplored problem for many Indic languages, largely due to the scarcity of high-quality annotated training data. To address this challenge, we propose a synthetic data generation pipeline that leverages Large Language Models (LLMs) and the Kestrel dataset to create text normalization datasets for target Indic languages.
 
 ## Ensemble Architecture
 
@@ -23,17 +23,17 @@ The normalized spans are then substituted back into the original sentence to pro
 
 ### Data Generation
 
-The `data_generation` folder contains the complete pipeline for generating synthetic text normalization datasets from the Kestrel dataset. Follow the instructions provided within the folder to create datasets for new Indic languages from scratch.
+The `data_generation` folder contains the complete pipeline for generating synthetic text normalization datasets from the Kestrel dataset. Detailed instructions are provided within the folder for generating datasets in new Indic languages from scratch.
 
 ### Model Weights and Training Data
 
 The script `import_models_&_training_data.py` can be used to download:
 
-* Pretrained model weights for Hints_ib model
+* Pretrained Hints_IB model weights
 * Training datasets
 * Dynamic model router weights
 
-for Hindi and Kannada.
+for both Hindi and Kannada.
 
 ### LLM and Seq2Seq Models
 
@@ -44,7 +44,7 @@ The `LLM_and_seq2seq` folder contains training and inference code for:
 * mT5
 * IndicBART
 
-Additional details are provided within the folder.
+Additional details and usage instructions are available within the folder.
 
 ### Indic_BERT_with_Hints
 
@@ -64,10 +64,11 @@ The `Ensemble_Models` folder contains the training and inference code for the fi
 * Rule-Based normalization
 * mT5 Small
 * Hints_IB
-To have the compatible MT5 for ensemble use the data obtained from **imporrt_models_&_training_data.py** and train the mt5 small on that using code given in  folder **LLM and Seq2Seq models**
 
 through a dynamic model selection framework.
 
+**Important:** To obtain an mT5 model compatible with the ensemble framework, first download the training data using `import_models_&_training_data.py`. The downloaded dataset can then be used to train mT5 Small using the training scripts provided in the `LLM_and_seq2seq` folder.
+
 ## Dataset Requirement
 
-The synthetic data generation pipeline requires access to the Kestrel dataset. Using the provided pipeline, datasets can be generated for additional Indic languages by leveraging machine translation and LLM-based normalization.
+The synthetic data generation pipeline requires access to the Kestrel dataset. Using the provided pipeline, datasets can be generated for additional Indic languages through machine translation and LLM-based normalization, enabling the creation of training resources for low-resource text normalization tasks.
