@@ -106,7 +106,7 @@ def parse_line(line):
         return ast.literal_eval(line)
 
 
-class KannadaNormalizationDataset(Dataset):
+class NormalizationDataset(Dataset):
     def __init__(self, filepath, tokenizer, max_length=128):
         self.data = []
         self.tokenizer = tokenizer
@@ -187,7 +187,7 @@ def collate_function(batch):
     batch_targets = torch.cat(padded_targets, dim=0)
 
     return batch_inputs,batch_targets
-train_dataset=KannadaNormalizationDataset("/home/sakshamt/SPIRE_TN/train_kannada.txt",tokenizer)
+train_dataset=NormalizationDataset("/home/sakshamt/SPIRE_TN/train_kannada.txt",tokenizer)
 #val_dataset=KannadaNormalizationDataset("/home/sakshamt/SPIRE_TN/valid.txt",tokenizer)
 device = "cuda:2"
 
